@@ -16,15 +16,15 @@ pipeline {
 
         stage('Create Namespace') {
             steps {
-                sh 'kubectl apply -f k8s/namespace.yml'
+                sh 'kubectl apply -f namespace.yml'
             }
         }
 
         stage('Create PV & PVC') {
             steps {
                 sh '''
-                kubectl apply -f k8s/mysql-pv.yml
-                kubectl apply -f k8s/mysql-pvc.yml
+                kubectl apply -f mysql-pv.yml
+                kubectl apply -f mysql-pvc.yml
 
                 echo "Waiting for PVC to be Bound..."
                 while true; do
@@ -42,8 +42,8 @@ pipeline {
         stage('Apply Configs') {
             steps {
                 sh '''
-                kubectl apply -f k8s/configmap.yml
-                kubectl apply -f k8s/secret.yml
+                kubectl apply -f configmap.yml
+                kubectl apply -f secret.yml
                 '''
             }
         }
@@ -51,7 +51,7 @@ pipeline {
         stage('Deploy MySQL') {
             steps {
                 sh '''
-                kubectl apply -f k8s/mysql-deployment.yml
+                kubectl apply -f mysql-deployment.yml
                 kubectl wait --for=condition=ready pod -l app=mysql -n $KUBE_NAMESPACE --timeout=180s
                 '''
             }
@@ -60,9 +60,9 @@ pipeline {
         stage('Deploy Backend & Frontend') {
             steps {
                 sh '''
-                kubectl apply -f k8s/backend-deployment.yml
-                kubectl apply -f k8s/frontend-deployment.yml
-                kubectl apply -f k8s/service.yml
+                kubectl apply -f backend-deployment.yml
+                kubectl apply -f frontend-deployment.yml
+                kubectl apply -f service.yml
 
                 kubectl wait --for=condition=ready pod -l app=backend -n $KUBE_NAMESPACE --timeout=180s
                 kubectl wait --for=condition=ready pod -l app=frontend -n $KUBE_NAMESPACE --timeout=180s
