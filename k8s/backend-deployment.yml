@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment               # Maintains backend pod desired state
+metadata:
+  name: backend
+  namespace: form-app
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+
+  template:
+    metadata:
+      labels:
+        app: backend
+
+    spec:
+      containers:
+      - name: backend
+        image: malaynew07/form-backend:v2   # Your pushed Docker image
+
+        ports:
+        - containerPort: 3000   # Backend app listens on port 3000
+
+        envFrom:
+        - configMapRef:
+            name: app-config    # Loads DB_HOST and DB_NAME from ConfigMap
+        - secretRef:
+            name: db-secret     # Loads DB_USER and DB_PASS from Secret
+
